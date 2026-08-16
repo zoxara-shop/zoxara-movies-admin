@@ -502,8 +502,8 @@
             
             <button class="action-submit-btn" onclick="alert('Banner Updated Successfully!')">Save Banner Layout</button>
         </div>
-    </div>
-        <script>
+                </div>
+                    <script>
         const BIN_ID = "6a818dabf5f4af5e291c786d";
         const MASTER_KEY = "$2a$10$o0tURljGpnk7bfgN/f.jVu2oRrE9fe2OFvIea1Fk5wMeMSSW4Up/i";
 
@@ -605,20 +605,40 @@
             }
         }
 
-        function autoFillIMDbData() {
+        async function autoFillIMDbData() {
             let query = document.getElementById('imdbIdInput').value.trim();
             if(query === "") {
                 alert("කරුණාකර මූවී එකේ නම ඇතුළත් කරන්න!");
                 return;
             }
-            document.getElementById('mTitle').value = query + " (2026) Sinhala Subtitles";
-            document.getElementById('mYear').value = "2026";
-            document.getElementById('mDuration').value = "125 min";
-            document.getElementById('mQuality').value = "WEB-DL";
-            document.getElementById('mRating').value = "8.1 (3.1K)";
-            document.getElementById('mGenres').value = "Action, Thriller, Drama";
-            document.getElementById('mDirector').value = "Popular Director";
-            alert("IMDb විස්තර සාර්ථකව ෆෝම් එකට පුරවන ලදී!");
+
+            let apiKey = "trilogy";
+            let url = `https://www.omdbapi.com/?t=${encodeURIComponent(query)}&apikey=${apiKey}`;
+
+            try {
+                let response = await fetch(url);
+                let data = await response.json();
+
+                if (data.Response === "True") {
+                    document.getElementById('mTitle').value = `${data.Title} (${data.Year}) Sinhala Subtitles`;
+                    document.getElementById('mPoster').value = data.Poster !== "N/A" ? data.Poster : "";
+                    document.getElementById('mBackdrop').value = data.Poster !== "N/A" ? data.Poster : "";
+                    document.getElementById('mYear').value = data.Year;
+                    document.getElementById('mDuration').value = data.Runtime !== "N/A" ? data.Runtime : "120 min";
+                    document.getElementById('mQuality').value = "WEB-DL";
+                    document.getElementById('mRating').value = data.imdbRating !== "N/A" ? `${data.imdbRating} (IMDb)` : "7.5";
+                    document.getElementById('mGenres').value = data.Genre !== "N/A" ? data.Genre : "Action, Drama";
+                    document.getElementById('mDirector').value = data.Director !== "N/A" ? data.Director : "Unknown Director";
+                    document.getElementById('mDesc').value = data.Plot !== "N/A" ? data.Plot : "Cinesubz වෙත සාදරයෙන් පිළිගන්නවා...";
+                    
+                    alert("IMDb විස්තර සාර්ථකව ලබාගන්න ලදී! ✅");
+                } else {
+                    alert("සමාවන්න! එවැනි චිත්‍රපටයක් හමු නොවීය. කරුණාකර නිවැරදි නම ඇතුළත් කරන්න.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("අන්තර්ජාල දෝෂයක් සිදු විය. කරුණාකර නැවත උත්සාහ කරන්න.");
+            }
         }
     </script>
 </body>
