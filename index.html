@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zoxara - Secure Admin Panel</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: #0b0b0e;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: #16161b;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+        }
+        .login-title {
+            font-size: 20px;
+            font-weight: 900;
+            color: #e50914;
+            margin-bottom: 8px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .login-subtitle {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: #0b0b0e;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #e50914;
+        }
+        .login-btn {
+            background: #e50914;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .login-btn:hover {
+            background: #f40612;
+        }
+        .error-msg {
+            background: rgba(229, 9, 20, 0.15);
+            color: #ff4757;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 11px;
+            text-align: center;
+            display: none;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+        }
+        #adminDashboard {
+            display: none;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 15px;
+        }
+        .admin-title-main {
+            font-size: 22px;
+            font-weight: 900;
+            color: #e50914;
+            letter-spacing: 1px;
+        }
+        .admin-badge {
+            background: rgba(46, 213, 115, 0.15);
+            color: #2ed573;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            border: 1px solid rgba(46, 213, 115, 0.3);
+        }
+        .logout-btn {
+            background: rgba(229, 9, 20, 0.2);
+            color: #ff4757;
+            border: 1px solid rgba(229, 9, 20, 0.4);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background: #e50914;
+            color: #fff;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        @media(min-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .stat-card {
+            background: #16161b;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .stat-card:hover {
+            border-color: #e50914;
+            transform: translateY(-2px);
+        }
+        .stat-number {
+            font-size: 22px;
+            font-weight: 900;
+            color: #fff;
+            margin-top: 5px;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+        }
+        .sub-page {
+            display: none;
+            background: #16161b;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .back-btn {
+            background: #25252d;
+            color: #fff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .sub-page-title {
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .sub-input, .sub-select, .sub-textarea {
+            width: 100%;
+            padding: 10px;
+            background: #0b0b0e;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+        .sub-textarea {
+            resize: vertical;
+            height: 90px;
+        }
+        .sub-input:focus, .sub-select:focus, .sub-textarea:focus {
+            outline: none;
+            border-color: #e50914;
+        }
+        .action-submit-btn {
+            background: #e50914;
+            color: #fff;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .movie-list-item, .comment-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0b0b0e;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .item-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .edit-movie-btn {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.4);
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .delete-movie-btn {
+            background: rgba(229, 9, 20, 0.2);
+            color: #ff4757;
+            border: 1px solid rgba(229, 9, 20, 0.4);
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .auto-fill-box {
+            background: rgba(229, 9, 20, 0.1);
+            border: 1px dashed rgba(229, 9, 20, 0.4);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card" id="loginCard">
+        <div class="login-title">ZOXARA ADMIN</div>
+        <div class="login-subtitle">Restricted Area - Owner Access Only</div>
+        <div class="error-msg" id="errorMsg">❌ වැරදි විස්තරයක්! කරුණාකර නිවැරදි නම සහ මුරපදය ලබා දෙන්න.</div>
+        
+        <div class="form-group">
+            <label>Admin Username</label>
+            <input type="text" id="usernameInput" class="form-control" placeholder="Enter your name">
+        </div>
+        <div class="form-group">
+            <label>Admin Password</label>
+            <input type="password" id="passwordInput" class="form-control" placeholder="Enter password">
+        </div>
+        <button class="login-btn" onclick="verifyLogin()">Login to Dashboard</button>
+    </div>
+
+    <div id="adminDashboard">
+        <div class="admin-header">
+            <div>
+                <div class="admin-title-main">ZOXARA ADMIN</div>
+                <div style="font-size: 11px; color: #888; margin-top: 3px;">Welcome, Pasindu Chamod</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="admin-badge">🟢 Secure Session</div>
+                <button class="logout-btn" onclick="logoutAdmin()">Logout</button>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="mainMenuGrid">
+            <div class="stat-card" onclick="openPage('addMoviePage')">
+                <div class="stat-label">Movie Management</div>
+                <div class="stat-number" style="font-size: 15px; color: #e50914; margin-top: 8px;">➕ Publish Movie</div>
+            </div>
+            <div class="stat-card" onclick="openPage('editMovieSearchPage')">
+                <div class="stat-label">Correction Control</div>
+                <div class="stat-number" style="font-size: 15px; color: #3498db; margin-top: 8px;">✏️ Edit Movie</div>
+            </div>
+            <div class="stat-card" onclick="openPage('deleteMoviePage')">
+                <div class="stat-label">Database Control</div>
+                <div class="stat-number" style="font-size: 15px; color: #ff4757; margin-top: 8px;">🗑️ Delete Movie</div>
+            </div>
+            <div class="stat-card" onclick="openPage('categoryPage')">
+                <div class="stat-label">Site Organization</div>
+                <div class="stat-number" style="font-size: 15px; color: #f39c12; margin-top: 8px;">📂 Categories</div>
+            </div>
+            <div class="stat-card" onclick="openPage('commentsPage')">
+                <div class="stat-label">User Interactions</div>
+                <div class="stat-number" style="font-size: 15px; color: #9b59b6; margin-top: 8px;">💬 Comments Moderation</div>
+            </div>
+            <div class="stat-card" onclick="openPage('bannerPage')">
+                <div class="stat-label">Featured Layout</div>
+                <div class="stat-number" style="font-size: 15px; color: #2ed573; margin-top: 8px;">🎬 Top 5 Banners</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Site Movies</div>
+                <div class="stat-number" style="font-size: 18px; color: #fff; margin-top: 6px;">142 Active</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Daily Visitors</div>
+                <div class="stat-number" style="font-size: 18px; color: #2ed573; margin-top: 6px;">18,450 Views</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Owner Control</div>
+                <div class="stat-number" style="font-size: 13px; color: #e50914; margin-top: 8px;">Pasindu Chamod</div>
+            </div>
+        </div>
+
+        <div id="addMoviePage" class="sub-page">
+            <button class="back-btn" onclick="closePages()">← Back to Dashboard</button>
+            <div class="sub-page-title">Publish / Edit Movie</div>
+            
+            <div class="auto-fill-box">
+                <label style="font-size: 11px; color: #ff4757; font-weight: bold; display: block; margin-bottom: 5px;">⚡ IMDb Auto-Fetch (Optional)</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="imdbIdInput" class="sub-input" placeholder="Enter Movie Name (Ex: Kattalan 2026)" style="margin-bottom:0;">
+                    <button class="action-submit-btn" style="width: 120px; margin-top: 0;" onclick="autoFillIMDbData()">Auto Fill</button>
+                </div>
+            </div>
+
+            <label style="font-size: 11px; color: #aaa;">Movie Title</label>
+            <input type="text" id="mTitle" class="sub-input" placeholder="Ex: Kattalan (2026) Sinhala Subtitles">
+            
+            <label style="font-size: 11px; color: #aaa;">Poster Image URL</label>
+            <input type="text" id="mPoster" class="sub-input" placeholder="https://...">
+
+            <label style="font-size: 11px; color: #aaa;">Backdrop / Banner Image URL</label>
+            <input type="text" id="mBackdrop" class="sub-input" placeholder="https://...">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-size: 11px; color: #aaa;">Release Year</label>
+                    <input type="text" id="mYear" class="sub-input" placeholder="2026">
+                </div>
+                <div>
+                    <label style="font-size: 11px; color: #aaa;">Duration</label>
+                    <input type="text" id="mDuration" class="sub-input" placeholder="119 min">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-size: 11px; color: #aaa;">Quality Tag</label>
+                    <input type="text" id="mQuality" class="sub-input" placeholder="WEB-DL">
+                </div>
+                <div>
+                    <label style="font-size: 11px; color: #aaa;">IMDb Rating</label>
+                    <input type="text" id="mRating" class="sub-input" placeholder="7.8 (2.4K)">
+                </div>
+            </div>
+
+            <label style="font-size: 11px; color: #aaa;">Genres</label>
+            <input type="text" id="mGenres" class="sub-input" placeholder="Action, Thriller">
+
+            <label style="font-size: 11px; color: #aaa;">Director Name</label>
+            <input type="text" id="mDirector" class="sub-input" placeholder="Paul George">
+
+            <label style="font-size: 11px; color: #aaa;">Subtitle Author</label>
+            <input type="text" id="mSubAuthor" class="sub-input" placeholder="තුසිත් දිල්හාන් (CineSubz.net)">
+
+            <label style="font-size: 11px; color: #aaa;">Movie Description</label>
+            <textarea id="mDesc" class="sub-textarea" placeholder="Cinesubz වෙත සාදරයෙන් පිළිගන්නවා..."></textarea>
+
+            <label style="font-size: 11px; color: #aaa;">Server 1 Player Link</label>
+            <input type="text" id="mServer1" class="sub-input" placeholder="https://...">
+
+            <label style="font-size: 11px; color: #aaa;">Server 2 Player Link</label>
+            <input type="text" id="mServer2" class="sub-input" placeholder="https://...">
+
+            <label style="font-size: 11px; color: #aaa;">YouTube Trailer Link</label>
+            <input type="text" id="mTrailer" class="sub-input" placeholder="https://youtube.com/...">
+
+            <label style="font-size: 11px; color: #aaa;">Download Link (480p)</label>
+            <input type="text" id="mDl480" class="sub-input" placeholder="https://...">
+
+            <label style="font-size: 11px; color: #aaa;">Download Link (720p)</label>
+            <input type="text" id="mDl720" class="sub-input" placeholder="https://...">
+
+            <label style="font-size: 11px; color: #aaa;">Download Link (1080p)</label>
+            <input type="text" id="mDl1080" class="sub-input" placeholder="https://...">
+
+            <button class="action-submit-btn" onclick="publishMovieToCloud()">Save & Publish Movie</button>
+        </div>
+
+        <div id="editMovieSearchPage" class="sub-page">
+            <button class="back-btn" onclick="closePages()">← Back to Dashboard</button>
+            <div class="sub-page-title">Select Movie to Edit Details</div>
+            <input type="text" class="sub-input" placeholder="Search movie name to update...">
+            
+            <div class="movie-list-item">
+                <span>Kattalan (2026) Sinhala Subtitles</span>
+                <button class="edit-movie-btn" onclick="openPage('addMoviePage')">Edit</button>
+            </div>
+            <div class="movie-list-item">
+                <span>Avatar: The Way of Water (2022)</span>
+                <button class="edit-movie-btn" onclick="openPage('addMoviePage')">Edit</button>
+            </div>
+        </div>
+
+        <div id="deleteMoviePage" class="sub-page">
+            <button class="back-btn" onclick="closePages()">← Back to Dashboard</button>
+            <div class="sub-page-title">Delete Movies</div>
+            <input type="text" class="sub-input" placeholder="Search movie to delete...">
+            
+            <div class="movie-list-item">
+                <span>Kattalan (2026) Sinhala Subtitles</span>
+                <button class="delete-movie-btn" onclick="alert('Movie Deleted Successfully!')">Delete</button>
+            </div>
+            <div class="movie-list-item">
+                <span>Inception (2010)</span>
+                <button class="delete-movie-btn" onclick="alert('Movie Deleted Successfully!')">Delete</button>
+            </div>
+        </div>
+
+        <div id="categoryPage" class="sub-page">
+            <button class="back-btn" onclick="closePages()">← Back to Dashboard</button>
+            <div class="sub-page-title">Manage Categories / Genres</div>
+            <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+                <input type="text" class="sub-input" placeholder="New Category Name (Ex: Horror)" style="margin-bottom:0;">
+                <button class="action-submit-btn" style="width: 100px; margin-top:0;" onclick="alert('Category Added!')">Add</button>
+            </div>
+            <div class="movie-list-item">
+                <span>Action</span>
+                <button class="delete-movie-btn" onclick="alert('Category Deleted!')">Remove</button>
+            </div>
+            <div class="movie-list-item">
+                <span>Thriller</span>
+                <button class="delete-movie-btn" onclick="alert('Category Deleted!')">Remove</button>
+            </div>
+            <div class="movie-list-item">
+                <span>Malayalam</span>
+                <button class="delete-movie-btn" onclick="alert('Category Deleted!')">Remove</button>
+            </div>
+        </div>
+
+        <div id="commentsPage" class="sub-page">
+            <button class="back-btn" onclick="closePages()">← Back to Dashboard</button>
+            <div class="sub-page-title">User Comments Moderation</div>
+            
+            <div class="comment-list-item">
+                <div>
+                    <strong style="color: #e50914;">Nimesh Silva</strong> <span style="color:#888; font-size:10px;">on Kattalan (2026)</span>
+                    <p style="color: #ccc; margin-top: 4px;">සුපිරි මූවී එකක් බ්‍රෝ, පට්ට ස්තුතියි සබ් එකට!</p>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="edit-movie-btn" onclick="alert('Comment Approved!')">Approve</button>
+                    <button class="delete-movie-btn" onclick="alert('Comment Deleted!')">Delete</button>
+                </div>
+            </div>
+
+            <div class="comment-list-item">
+                <div>
+                    <strong style="color: #e50914;">Kasun Malinda</strong> <span style="color:#888; font-size:10px;">on Avatar 2</span>
+                    <p style="color: #ccc; margin-top: 4px;">ලින්ක් එක වැඩ කරන්නේ නෑ අලුත් එකක් දාන්න.</p>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="edit-movie-btn" onclick="alert('Comment Approved!')">Approve</button>
+                    <button class="delete-movie-btn" onclick="alert('Comment Deleted!')">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="bannerPage" class="sub-page">
+            <button class="back-btn" onclick="closePages()">← Back to Dashboard</button>
+            <div class="sub-page-title">Select Top 5 Banner Movies</div>
+            <label style="font-size: 11px; color: #aaa; display: block; margin-bottom: 5px;">Banner Slot 1</label>
+            <select class="sub-select"><option>-- Choose movie --</option><option selected>Kattalan (2026)</option></select>
+            
+            <label style="font-size: 11px; color: #aaa; display: block; margin-bottom: 5px;">Banner Slot 2</label>
+            <select class="sub-select"><option>-- Choose movie --</option><option>Avatar 2</option></select>
+            
+            <button class="action-submit-btn" onclick="alert('Banner Updated Successfully!')">Save Banner Layout</button>
+        </div>
+    </div>
+    <script>
+        const BIN_ID = "6a818dabf5f4af5e291c786d";
+        const MASTER_KEY = "ඔයාගේ_X-MASTER-KEY_එක_මෙතනට_දෙන්න";
+
+        window.onload = function() {
+            if (sessionStorage.getItem("zoxara_admin_auth") === "true") {
+                showDashboard();
+            }
+        };
+
+        function verifyLogin() {
+            let user = document.getElementById('usernameInput').value.trim();
+            let pass = document.getElementById('passwordInput').value.trim();
+            let errorEl = document.getElementById('errorMsg');
+
+            if (user === "pasindu chamod munasinha" && pass === "20080620Sl") {
+                sessionStorage.setItem("zoxara_admin_auth", "true");
+                showDashboard();
+            } else {
+                errorEl.style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('loginCard').style.display = 'none';
+            document.getElementById('adminDashboard').style.display = 'block';
+        }
+
+        function logoutAdmin() {
+            sessionStorage.removeItem("zoxara_admin_auth");
+            location.reload();
+        }
+
+        function openPage(pageId) {
+            document.getElementById('mainMenuGrid').style.display = 'none';
+            let pages = document.querySelectorAll('.sub-page');
+            pages.forEach(p => p.style.display = 'none');
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        function closePages() {
+            let pages = document.querySelectorAll('.sub-page');
+            pages.forEach(p => p.style.display = 'none');
+            document.getElementById('mainMenuGrid').style.display = 'grid';
+        }
+
+        async function publishMovieToCloud() {
+            let newMovie = {
+                title: document.getElementById('mTitle').value,
+                poster: document.getElementById('mPoster').value,
+                backdrop: document.getElementById('mBackdrop').value,
+                year: document.getElementById('mYear').value,
+                duration: document.getElementById('mDuration').value,
+                quality: document.getElementById('mQuality').value,
+                rating: document.getElementById('mRating').value,
+                genres: document.getElementById('mGenres').value,
+                director: document.getElementById('mDirector').value,
+                subAuthor: document.getElementById('mSubAuthor').value,
+                desc: document.getElementById('mDesc').value,
+                server1: document.getElementById('mServer1').value,
+                server2: document.getElementById('mServer2').value,
+                trailer: document.getElementById('mTrailer').value,
+                dl480: document.getElementById('mDl480').value,
+                dl720: document.getElementById('mDl720').value,
+                dl1080: document.getElementById('mDl1080').value
+            };
+
+            if (!newMovie.title) {
+                alert("කරුණාකර මූවී නම (Movie Title) ඇතුළත් කරන්න!");
+                return;
+            }
+
+            try {
+                let getResponse = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': MASTER_KEY }
+                });
+                let data = await getResponse.json();
+                let moviesList = data.record.movies || [];
+
+                moviesList.push(newMovie);
+
+                let updateResponse = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': MASTER_KEY
+                    },
+                    body: JSON.stringify({ movies: moviesList })
+                });
+
+                if (updateResponse.ok) {
+                    alert('මූවී එක සාර්ථකව ක්ලවුඩ් ඩේටාබේස් එකට පබ්ලිශ් විය! ✅');
+                } else {
+                    alert('ක්ලවුඩ් එකට යැවීමේ දෝෂයක් සිදු විය.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('සම්බන්ධ වීමේ දෝෂයක් සිදු විය. අන්තර්ජාලය පරීක්ෂා කරන්න.');
+            }
+        }
+
+        function autoFillIMDbData() {
+            let query = document.getElementById('imdbIdInput').value.trim();
+            if(query === "") {
+                alert("කරුණාකර මූවී එකේ නම ඇතුළත් කරන්න!");
+                return;
+            }
+            document.getElementById('mTitle').value = query + " (2026) Sinhala Subtitles";
+            document.getElementById('mYear').value = "2026";
+            document.getElementById('mDuration').value = "125 min";
+            document.getElementById('mQuality').value = "WEB-DL";
+            document.getElementById('mRating').value = "8.1 (3.1K)";
+            document.getElementById('mGenres').value = "Action, Thriller, Drama";
+            document.getElementById('mDirector').value = "Popular Director";
+            alert("IMDb විස්තර සාර්ථකව ෆෝම් එකට පුරවන ලදී!");
+        }
+    </script>
+</body>
+</html>
+
